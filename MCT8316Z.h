@@ -1,0 +1,481 @@
+/*
+ * MCT8316Z.h
+ *
+ *  Created on: Dec 21, 2022
+ *      Author: Fabian
+ */
+
+#ifndef MCT8316Z_DRIVER_MCT8316Z_H_
+#define MCT8316Z_DRIVER_MCT8316Z_H_
+
+#include "stm32l4xx_hal.h" /* Needed for SPI */
+#include <stdio.h>
+#include "stdbool.h"
+
+/*
+ The SDI input data word is 16 bits long and consists of the following format:
+ • 1 read or write bit, W (bit B15)
+ • 6 address bits, A (bits B14 through B9)
+ • Parity bit, P (bit B8). Parity bit is set such that the SDI input data word has even number of 1s and 0s
+ • 8 data bits, D (bits B7 through B0)
+ */
+
+#define WRITE 0
+#define READ 1
+
+#define STATUS_REGISTER_COUNT 3
+#define CONTROL_REGISTER_COUNT 10
+
+// ADRESS DEFINES
+#define IC_STATUS_REGISTER_ADDRESS 0x0
+#define IC_STATUS_REGISTER_1_ADDRESS 0x1
+#define IC_STATUS_REGISTER_2_ADDRESS 0x2
+#define IC_CONTROL_REGISTER_1_ADDRESS 0x3
+#define IC_CONTROL_REGISTER_2_ADDRESS 0x4
+#define IC_CONTROL_REGISTER_3_ADDRESS 0x5
+#define IC_CONTROL_REGISTER_4_ADDRESS 0x6
+#define IC_CONTROL_REGISTER_5_ADDRESS 0x7
+#define IC_CONTROL_REGISTER_6_ADDRESS 0x8
+#define IC_CONTROL_REGISTER_7_ADDRESS 0x9
+#define IC_CONTROL_REGISTER_8_ADDRESS 0xA
+#define IC_CONTROL_REGISTER_9_ADDRESS 0xB
+#define IC_CONTROL_REGISTER_10_ADDRESS 0xC
+
+
+
+
+
+
+// IC_Status_Register
+#define STATUS_REGISTER_MTR_LOCK_NO_MOTOR_LOCK_DETECTED 0x0
+#define STATUS_REGISTER_MTR_LOCK_MOTOR_LOCK_DETECTED 0x1
+
+#define STATUS_REGISTER_BK_FLT_NO_BUCK_FAULT_CONDITION_DETECTED 0x0
+#define STATUS_REGISTER_BK_FLT_BUCK_FAULT_CONDITION_DETECTED 0x1
+
+#define STATUS_REGISTER_SPI_FLT_NO_SPI_FAULT_CONDITION_DETECTED 0x0
+#define STATUS_REGISTER_SPI_FLT_SPI_FAULT_CONDITION_DETECTED 0x1
+
+#define STATUS_REGISTER_OCP_NO_OVERCURRENTT_CONDITION_DETECTED 0x0
+#define STATUS_REGISTER_OCP_OVERCURRENTT_CONDITION_DETECTED 0x1
+
+#define STATUS_REGISTER_NPOR_POWER_ON_RESET_DETECTED_ON_VM 0x0
+#define STATUS_REGISTER_NPOR_NO_POWER_ON_RESET_DETECTED_ON_VM 0x1
+
+#define STATUS_REGISTER_OVP_NO_SUPPLY_OVERVOLTAGE_CONDITION_DETECTED_ON_VM 0x0
+#define STATUS_REGISTER_OVP_SUPPLY_OVERVOLTAGE_CONDITION_DETECTED_ON_VM 0x1
+
+#define STATUS_REGISTER_OT_NO_OVERTEMPERATURE_WARNING_SHUTDOWN_DETECTED 0x0
+#define STATUS_REGISTER_OT_OVERTEMPERATURE_WARNING_SHUTDOWN_DETECTED 0x1
+
+#define STATUS_REGISTER_FAULT_NO_FAULT_CONDITION_DETECTED 0
+#define STATUS_REGISTER_FAULT_FAULT_CONDITION_DETECTED 1
+
+
+typedef union {
+	struct {
+		// This register is READ ONLY
+		bool MTR_LOCK :1; // Motor Lock
+		bool BK_FLT :1; // Buck Fault
+		bool SPI_FLT :1; // SPI Fault
+		bool OCP :1; // Over Current Protection Status
+		bool NPOR :1; // Supply Power On Reset
+		bool OVP :1; // Supply Overvoltage Protection Status
+		bool OT :1; // Overtemperature Fault
+		bool FAULT :1; // Device Fault
+	} fields;
+	uint8_t data;
+} IC_Status_Register;
+
+
+// IC_Status_Register1
+#define STATUS_REGISTER_1_OTW_NO_FAULT_CONDITION_DETECTED 0x0
+#define STATUS_REGISTER_1_OTW_FAULT_CONDITION_DETECTED 0x1
+
+#define STATUS_REGISTER_1_OTS_NO_OVERTEMPERATURE_SHUTDOWN_DETECTED 0x0
+#define STATUS_REGISTER_1_OTS_OVERTEMPERATURE_SHUTDOWN_DETECTED 0x1
+
+#define STATUS_REGISTER_1_OCP_HC_NO_OVERCURRENT_DETECTED_ON_HIGH_SIDE_SWITCH_OF_OUTC 0x0
+#define STATUS_REGISTER_1_OCP_HC_OVERCURRENT_DETECTED_ON_HIGH_SIDE_SWITCH_OF_OUTC 0x1
+
+#define STATUS_REGISTER_1_OCL_LC_NO_OVERCURRENT_DETECTED_ON_LOW_SIDE_SWITCH_OF_OUTC 0x0
+#define STATUS_REGISTER_1_OCL_LC_OVERCURRENT_DETECTED_ON_LOW_SIDE_SWITCH_OF_OUTC 0x1
+
+#define STATUS_REGISTER_1_OCP_HB_NO_OVERCURRENT_DETECTED_ON_HIGH_SIDE_SWITCH_OF_OUTB 0x0
+#define STATUS_REGISTER_1_OCP_HB_OVERCURRENT_DETECTED_ON_HIGH_SIDE_SWITCH_OF_OUTB 0x1
+
+#define STATUS_REGISTER_1_OCP_LB_NO_OVERCURRENT_DETECTED_ON_LOW_SIDE_SWITCH_OF_OUTB 0x0
+#define STATUS_REGISTER_1_OCP_LB_OVERCURRENT_DETECTED_ON_LOW_SIDE_SWITCH_OF_OUTB 0x1
+
+#define STATUS_REGISTER_1_OCP_HA_NO_OVERCURRENT_DETECTED_ON_HIGH_SIDE_SWITCH_OF_OUTA 0x0
+#define STATUS_REGISTER_1_OCP_HA_OVERCURRENT_DETECTED_ON_HIGH_SIDE_SWITCH_OF_OUTA 0x1
+
+#define STATUS_REGISTER_1_OCP_LA_NO_OVERCURRENT_DETECTED_ON_LOW_SIDE_SWITCH_OF_OUTA 0x0
+#define STATUS_REGISTER_1_OCP_LA_OVERCURRENT_DETECTED_ON_LOW_SIDE_SWITCH_OF_OUTA 0x1
+typedef union {
+	struct {
+		// This register is READ ONLY
+		bool OTW :1; // Overtemperature Warning
+		bool OTS :1; // Overtemperature Shutdown
+		bool OCP_HC :1; // Overcurrent on High-side switch OUTC
+		bool OCL_LC :1; // Overcurrent on Low-side switch OUTC
+		bool OCP_HB :1; // Overcurrent on High-side switch OUTB
+		bool OCP_LB :1; // Overcurrent on Low-side switch OUTB
+		bool OCP_HA :1; // Overcurrent on High-side switch OUTA
+		bool OCP_LA :1; // Overcurrent on Low-side switch OUTA
+	} fields;
+	uint8_t data;
+} IC_Status_Register1;
+
+
+
+// IC_Status_Register2
+#define STATUS_REGISTER_2_OTP_ERR_NO_OTP_ERROR_DETECTED 0
+#define STATUS_REGISTER_2_OTP_ERR_OTP_ERROR_DETECTED 1
+
+#define STATUS_REGISTER_2_BUCK_OCP_NO_BUCK_REGULATOR_OVERCURRENT_DETECTED 0x0
+#define STATUS_REGISTER_2_BUCK_OCP_BUCK_REGULATOR_OVERCURRENT_DETECTED 0x1
+
+#define STATUS_REGISTER_2_BUCK_UV_NO_BUCK_REGULATOR_UNDERVOLTAGE_DETECTED 0x0
+#define STATUS_REGISTER_2_BUCK_UV_BUCK_REGULATOR_UNDERVOLTAGE_DETECTED 0x1
+
+#define STATUS_REGISTER_2_VCP_UV_NO_CHARGE_PUMP_UNDERVOLTAGE_DETECTED 0x0
+#define STATUS_REGISTER_2_VCP_UV_CHARGE_PUMP_UNDERVOLTAGE_DETECTED 0x1
+
+#define STATUS_REGISTER_2_SPI_PARITY_NO_SPI_PARITY_ERROR_DETECTED 0x0
+#define STATUS_REGISTER_2_SPI_PARITY_SPI_PARITY_ERROR_DETECTED 0x1
+
+#define STATUS_REGISTER_2_SPI_SCLK_FLT_NO_SPI_CLOCK_FRAMING_ERROR_DETECTED 0x0
+#define STATUS_REGISTER_2_SPI_SCLK_FLT_SPI_CLOCK_FRAMING_ERROR_DETECTED 0x1
+
+#define STATUS_REGISTER_2_SPI_ADDR_FLT_NO_SPI_ADDRESS_FAULT_DETECTED 0x0
+#define STATUS_REGISTER_2_SPI_ADDR_FLT_SPI_ADDRESS_FAULT_DETECTED 0x1
+typedef union {
+	struct {
+		// This register is READ ONLY
+		bool RESERVED :1; // RESERVED
+		bool OTP_ERR :1; // One Time Programmability Error
+		bool BUCK_OCP :1; // Buck Regulator Overcurrent Status
+		bool BUCK_UV :1; // Buck Regulator Undervoltage Status
+		bool VCP_UV :1; // Charge Pump Undervoltage
+		bool SPI_PARITY :1; // SPI Parity Error
+		bool SPI_SCLK_FLT :1; // SPI Clock Framing Error
+		bool SPI_ADDR_FLT :1; //SPI Address Error
+	} fields;
+	uint8_t data;
+} IC_Status_Register2;
+
+
+// IC_Control_Register1
+#define CONTROL_REGISTER_1_REG_LOCK_NO_EFFECT_UNLESS_LOCKED_OR_UNLOCKED 0x0
+#define CONTROL_REGISTER_1_REG_LOCK_NO_EFFECT_UNLESS_LOCKED_OR_UNLOCKED_1 0x1
+#define CONTROL_REGISTER_1_REG_LOCK_NO_EFFECT_UNLESS_LOCKED_OR_UNLOCKED_2 0x2
+#define CONTROL_REGISTER_1_REG_LOCK_WRITE_011B_TO_UNLOCK_ALL_REGISTERS 0x3
+#define CONTROL_REGISTER_1_REG_LOCK_NO_EFFECT_UNLESS_LOCKED_OR_UNLOCKED_3 0x4
+#define CONTROL_REGISTER_1_REG_LOCK_NO_EFFECT_UNLESS_LOCKED_OR_UNLOCKED_4 0x5
+#define CONTROL_REGISTER_1_REG_LOCK_WRITE_110B_TO_LOCK_SETTINGS_IGNORING_FURTHER_WRITES 0x6
+#define CONTROL_REGISTER_1_REG_LOCK_NO_EFFECT_UNLESS_LOCKED_OR_UNLOCKED_5 0x7
+typedef union {
+	struct {
+		// Bit 7-3 Reserved
+		uint8_t RESERVED :5; // RESERVED
+		uint8_t REG_LOCK :3; // Register Lock
+	} fields;
+	uint8_t data;
+} IC_Control_Register1;
+
+
+
+// IC_Control_Register2
+#define CONTROL_REGISTER_2_SDO_MODE_SDO_IO_IN_OPEN_DRAIN_MODE 0x00
+#define CONTROL_REGISTER_2_SDO_MODE_SDO_IO_IN_PUSH_PULL_MODE 0x01
+
+#define CONTROL_REGISTER_2_SLEW_RATE_25_V_PER_US 0x00
+#define CONTROL_REGISTER_2_SLEW_RATE_50_V_PER_US 0x01
+#define CONTROL_REGISTER_2_SLEW_RATE_125_V_PER_US 0x02
+#define CONTROL_REGISTER_2_SLEW_RATE_200_V_PER_US 0x03
+
+#define CONTROL_REGISTER_2_PWM_MODE_ASYNCHRONOUS_RECTIFICATION_WITH_ANALOG_HALL 0x00
+#define CONTROL_REGISTER_2_PWM_MODE_ASYNCHRONOUS_RECTIFICATION_WITH_DIGITAL_HALL 0x01
+#define CONTROL_REGISTER_2_PWM_MODE_SYNCHRONOUS_RECTIFICATION_WITH_ANALOG_HALL 0x02
+#define CONTROL_REGISTER_2_PWM_MODE_SYNCHRONOUS_RECTIFICATION_WITH_DIGITAL_HALL 0x3
+
+#define CONTROL_REGISTER_2_CLR_FLAG_NO_CLEAR_COMMAND_ISSUED 0x00
+#define CONTROL_REGISTER_2_CLR_FLAG_CLEAR_LATCHED_FAULT_BITS 0x01
+typedef union {
+	struct {
+		// Bit 7-6 Reserved
+		uint8_t RESERVED :2; // RESERVED
+		bool SDO_MODE :1; // SDO Mode Setting
+		uint8_t SLEW :2; // Slew Rrate Settings
+		uint8_t PWM_MODE :2; // Device Mode Selection
+		bool CLR_FLAG :1; // Clear Fault
+	} fields;
+	uint8_t data;
+} IC_Control_Register2;
+
+// IC_Control_Register3
+#define CONTROL_REGISTER_3_PWM_100_DUTY_SEL_20KHZ 0x00
+#define CONTROL_REGISTER_3_PWM_100_DUTY_SEL_40KHZ 0x01
+
+#define CONTROL_REGISTER_3_OVP_SEL_34V 0x00
+#define CONTROL_REGISTER_3_OVP_SEL_22V 0x01
+
+#define CONTROL_REGISTER_3_OVP_EN_DISABLED 0x00
+#define CONTROL_REGISTER_3_OVP_EN_ENABLED 0x01
+
+#define CONTROL_REGISTER_3_OTW_REP_DISABLED 0x00
+#define CONTROL_REGISTER_3_OTW_REP_ENABLED 0x01
+typedef union {
+	struct {
+		// Bit 7-5 Reserved
+		uint8_t RESERVED :3; // RESERVED
+		bool PWM_100_DUTY_SEL :1; // frequency of PWM at 100% Duty Cycle
+		bool OVP_SEL :1; // Overvoltage Level Bit
+		bool OVP_EN :1; // Overvoltage Enable Bit
+		bool RESERVED_2 :1; // RESERVED
+		bool OTW_REP :1; // Overtemperature Waring Reporting Bit
+	} fields;
+	uint8_t data;
+} IC_Control_Register3;
+
+
+
+// IC_Control_Register4
+#define CONTROL_REGISTER_4_DRV_OFF_NO_ACTION 0x00
+#define CONTROL_REGISTER_4_DRV_OFF_LOW_PWR_STANDBY 0x01
+
+#define CONTROL_REGISTER_4_OCP_CBC_DISABLED 0x00
+#define CONTROL_REGISTER_4_OCP_CBC_ENABLED 0x01
+
+#define CONTROL_REGISTER_4_OCP_DEG_0_2US 0x00
+#define CONTROL_REGISTER_4_OCP_DEG_0_6US 0x01
+#define CONTROL_REGISTER_4_OCP_DEG_1_25US 0x02
+#define CONTROL_REGISTER_4_OCP_DEG_1_6US 0x03
+
+#define CONTROL_REGISTER_4_OCP_RETRY_5MS 0x00
+#define CONTROL_REGISTER_4_OCP_RETRY_500MS 0x01
+
+#define CONTROL_REGISTER_4_OCP_LVL_16A 0x00
+#define CONTROL_REGISTER_4_OCP_LVL_24A 0x01
+
+#define CONTROL_REGISTER_4_OCP_MODE_LATCHED_FAULT 0x00
+#define CONTROL_REGISTER_4_OCP_MODE_AUTO_RETRY_FAULT 0x01
+#define CONTROL_REGISTER_4_OCP_MODE_REPORT_ONLY 0x02
+#define CONTROL_REGISTER_4_OCP_MODE_NOT_REPORTED 0x03
+typedef union {
+	struct {
+		bool DRV_OFF :1; // Driver Off Bit
+		bool OCP_CBC :1; // OCP PWM Cycle Operation Bit
+		uint8_t OCP_DEG :2; // OCP Deglitch Time Settings
+		bool OCP_RETRY :1; // OCP Retry Time Settings
+		bool OCP_LVL :1; // Overcurrent Level Setting
+		uint8_t OCP_MODE :2; // OCP Fault Options
+	} fields;
+	uint8_t data;
+} IC_Control_Register4;
+
+
+
+// IC_Control_Register5
+#define CONTROL_REGISTER_5_ILIM_RECIR_BRAKE_MODE 0x00
+#define CONTROL_REGISTER_5_ILIM_RECIR_COAST_MODE 0x01
+
+#define CONTROL_REGISTER_5_EN_AAR_DISABLED 0x00
+#define CONTROL_REGISTER_5_EN_AAR_ENABLED 0x01
+
+#define CONTROL_REGISTER_5_EN_ASR_DISABLED 0x00
+#define CONTROL_REGISTER_5_EN_ASR_ENABLED 0x01
+
+#define CONTROL_REGISTER_5_CSA_GAIN_0_15V_PER_A 0x00
+#define CONTROL_REGISTER_5_CSA_GAIN_0_3V_PER_A 0x01
+#define CONTROL_REGISTER_5_CSA_GAIN_0_6V_PER_A 0x02
+#define CONTROL_REGISTER_5_CSA_GAIN_1_2V_PER_A 0x03
+
+typedef union {
+	struct {
+		bool RESERVED :1; // RESERVED
+		bool ILIM_RECIR :1; // Current Limit Recicurcaltion Settings
+		bool RESERVED_1 :1; // RESERVED
+		bool RESERVED_2 :1; // RESERVED
+		bool EN_AAR :1; // Active Asynchronus Rectification Enable Bit
+		uint8_t EN_ASR :1; // Active Synchronus Rectification Enable Bit
+		uint8_t CSA_GAIN :2; // Current Sense Amplifiers Gain Settings
+	} fields;
+	uint8_t data;
+} IC_Control_Register5;
+
+
+
+// IC_Control_Register6
+#define CONTROL_REGISTER_6_BUCK_PS_DIS_ENABLED 0x00
+#define CONTROL_REGISTER_6_BUCK_PS_DIS_DISABLED 0x01
+
+#define CONTROL_REGISTER_6_BUCK_CL_600MA 0x00
+#define CONTROL_REGISTER_6_BUCK_CL_150MA 0x01
+
+#define CONTROL_REGISTER_6_BUCK_SEL_3_3V 0x00
+#define CONTROL_REGISTER_6_BUCK_SEL_5_0V 0x01
+#define CONTROL_REGISTER_6_BUCK_SEL_4_0V 0x02
+#define CONTROL_REGISTER_6_BUCK_SEL_5_7V 0x03
+
+#define CONTROL_REGISTER_6_BUCK_ENABLED 0x00
+#define CONTROL_REGISTER_6_BUCK_DISABLED 0x01
+typedef union {
+	struct {
+		uint8_t RESERVED :2; // RESERVED
+		bool RESERVED_1 :1; // RESERVED
+		bool BUCK_PS_DIS :1; // Buck Power Sequencing Disable Bit
+		bool BUCK_CL :1; // Buck Current Limit Setting
+		uint8_t BUCK_SEL :2; // Buck Voltage Selection
+		bool BUCK_DIS :1; // Buck Disable Bit
+
+	} fields;
+	uint8_t data;
+} IC_Control_Register6;
+
+
+
+
+// IC_Control_Register7
+#define CONTROL_REGISTER_7_HALL_HYS_5MV 0x00
+#define CONTROL_REGISTER_7_HALL_HYS_50MV 0x01
+
+#define CONTROL_REGISTER_7_BRAKE_MODE_BRAKING 0x00
+#define CONTROL_REGISTER_7_BRAKE_MODE_COASTING 0x01
+
+#define CONTROL_REGISTER_7_COAST_DISABLED 0x00
+#define CONTROL_REGISTER_7_COAST_ENABLED 0x01
+
+#define CONTROL_REGISTER_7_BRAKE_DISABLED 0x00
+#define CONTROL_REGISTER_7_BRAKE_ENABLED 0x01
+
+#define CONTROL_REGISTER_7_DIR_CW 0x00
+#define CONTROL_REGISTER_7_DIR_CCW 0x01
+typedef union {
+	struct {
+		uint8_t RESERVED :3; // RESERVED
+		bool HALL_HYS :1; // Hall Comparator Hysteresis Settings
+		bool BRAKE_MODE :1; //Brake Mode Setting
+		bool COAST :1; // Coast Bit
+		bool BRAKE :1; // Brake Bit
+		bool DIR :1; // Direction Bit
+
+	} fields;
+	uint8_t data;
+} IC_Control_Register7;
+
+
+
+// IC_Control_Register8
+#define CONTROL_REGISTER_8_FGOUT_SEL_3X_COMM_FREQ 0x00
+#define CONTROL_REGISTER_8_FGOUT_SEL_1X_COMM_FREQ 0x01
+#define CONTROL_REGISTER_8_FGOUT_SEL_HALF_COMM_FREQ 0x02
+#define CONTROL_REGISTER_8_FGOUT_SEL_QUARTER_COMM_FREQ 0x03
+
+#define CONTROL_REGISTER_8_MTR_LOCK_RETRY_500MS 0x00
+#define CONTROL_REGISTER_8_MTR_LOCK_RETRY_5000MS 0x01
+
+#define CONTROL_REGISTER_8_MTR_LOCK_TDET_300MS 0x00
+#define CONTROL_REGISTER_8_MTR_LOCK_TDET_500MS 0x01
+#define CONTROL_REGISTER_8_MTR_LOCK_TDET_1000MS 0x02
+#define CONTROL_REGISTER_8_MTR_LOCK_TDET_5000MS 0x03
+
+#define CONTROL_REGISTER_8_MTR_LOCK_MODE_LATCHED_FAULT 0x00
+#define CONTROL_REGISTER_8_MTR_LOCK_MODE_AUTO_RETRY_FAULT 0x01
+#define CONTROL_REGISTER_8_MTR_LOCK_MODE_REPORT_ONLY 0x02
+#define CONTROL_REGISTER_8_MTR_LOCK_MODE_NO_REPORT 0x03
+typedef union {
+	struct {
+		uint8_t FGOUT_SEL :2; // Electrical Frequency Generation Output Mode Bits
+		bool RESERVED :1; //RESERVED
+		bool MTR_LOCK_RETRY :1; // Motor Lock Retry Time Settings
+		uint8_t MTR_LOCK_TDET :2; // Motor Lock Detection Time Settings
+		uint8_t MTR_LOCK_MODE :2; // Motor Lock Fault Options
+
+	} fields;
+	uint8_t data;
+} IC_Control_Register8;
+
+
+
+
+// IC_Control_Register9
+#define CONTROL_REGISTER_9_ADVANCE_LVL_0DEG 0x00
+#define CONTROL_REGISTER_9_ADVANCE_LVL_4DEG 0x01
+#define CONTROL_REGISTER_9_ADVANCE_LVL_7DEG 0x02
+#define CONTROL_REGISTER_9_ADVANCE_LVL_11DEG 0x03
+#define CONTROL_REGISTER_9_ADVANCE_LVL_15DEG 0x04
+#define CONTROL_REGISTER_9_ADVANCE_LVL_20DEG 0x05
+#define CONTROL_REGISTER_9_ADVANCE_LVL_25DEG 0x06
+#define CONTROL_REGISTER_9_ADVANCE_LVL_30DEG 0x07
+typedef union {
+	struct {
+		uint8_t RESERVED :5; // RESERVED
+		uint8_t ADVANCED_LVL :3; // Phase Advance Settings
+	} fields;
+	uint8_t data;
+} IC_Control_Register9;
+
+
+
+// IC_Control_Register10
+#define CONTROL_REGISTER_10_DLYCMP_EN_DISABLE 0x00
+#define CONTROL_REGISTER_10_DLYCMP_EN_ENABLE 0x01
+
+#define CONTROL_REGISTER_10_DLY_TARGET_0US 0x00
+#define CONTROL_REGISTER_10_DLY_TARGET_400US 0x01
+#define CONTROL_REGISTER_10_DLY_TARGET_600US 0x02
+#define CONTROL_REGISTER_10_DLY_TARGET_800US 0x03
+#define CONTROL_REGISTER_10_DLY_TARGET_1US 0x04
+#define CONTROL_REGISTER_10_DLY_TARGET_1200US 0x05
+#define CONTROL_REGISTER_10_DLY_TARGET_1400US 0x06
+#define CONTROL_REGISTER_10_DLY_TARGET_1600US 0x07
+#define CONTROL_REGISTER_10_DLY_TARGET_1800US 0x08
+#define CONTROL_REGISTER_10_DLY_TARGET_2US 0x09
+#define CONTROL_REGISTER_10_DLY_TARGET_2200US 0x0A
+#define CONTROL_REGISTER_10_DLY_TARGET_2400US 0x0B
+#define CONTROL_REGISTER_10_DLY_TARGET_2600US 0x0C
+#define CONTROL_REGISTER_10_DLY_TARGET_2800US 0x0D
+#define CONTROL_REGISTER_10_DLY_TARGET_3US 0x0E
+#define CONTROL_REGISTER_10_DLY_TARGET_3200US 0x0F
+typedef union {
+	struct {
+		uint8_t RESERVED :3; // RESERVED
+		bool DLYCMP_EN :1; // Driver Delay Compensation enable
+		uint8_t DLY_TARGET :4; //Delay Target Driver Delay Compensation
+	} fields;
+	uint8_t data;
+} IC_Control_Register10;
+
+
+
+typedef struct {
+	/* I2C handle */
+	SPI_HandleTypeDef *spiHandle;
+	GPIO_TypeDef *GPIOx;
+	GPIO_InitTypeDef *GPIO_Init;
+	IC_Status_Register statReg;
+	IC_Status_Register1 statReg1;
+	IC_Status_Register2 statReg2;
+	IC_Control_Register1 ctrlReg1;
+	IC_Control_Register2 ctrlReg2;
+	IC_Control_Register3 ctrlReg3;
+	IC_Control_Register4 ctrlReg4;
+	IC_Control_Register5 ctrlReg5;
+	IC_Control_Register6 ctrlReg6;
+	IC_Control_Register7 ctrlReg7;
+	IC_Control_Register8 ctrlReg8;
+	IC_Control_Register9 ctrlReg9;
+	IC_Control_Register10 ctrlReg10;
+} MCT8316;
+
+
+
+unsigned char parity_calc(unsigned char value);
+uint8_t MCT8316_Init(SPI_HandleTypeDef *hspi, MCT8316 *dev);
+HAL_StatusTypeDef MCT8316_Write(MCT8316 *dev, uint8_t *address, uint8_t *data, uint8_t *oldData);
+HAL_StatusTypeDef MCT8316_Read(MCT8316 *dev, uint8_t *address, uint8_t *data);
+uint8_t statusRegisterFault(MCT8316 *dev);
+void errorHandler();
+#endif /* MCT8316Z_DRIVER_MCT8316Z_H_ */
