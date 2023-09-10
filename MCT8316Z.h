@@ -41,11 +41,6 @@
 #define IC_CONTROL_REGISTER_9_ADDRESS 0xB
 #define IC_CONTROL_REGISTER_10_ADDRESS 0xC
 
-
-
-
-
-
 // IC_Status_Register
 #define STATUS_REGISTER_MTR_LOCK_NO_MOTOR_LOCK_DETECTED 0x0
 #define STATUS_REGISTER_MTR_LOCK_MOTOR_LOCK_DETECTED 0x1
@@ -71,22 +66,33 @@
 #define STATUS_REGISTER_FAULT_NO_FAULT_CONDITION_DETECTED 0
 #define STATUS_REGISTER_FAULT_FAULT_CONDITION_DETECTED 1
 
+// exclude masks
+#define STATUS_REGISTER_MASK	 0x11111111
+#define CONTROL_REGISTER_1_MASK  0x00000111
+#define CONTROL_REGISTER_2_MASK  0x00111111
+#define CONTROL_REGISTER_3_MASK  0x00011101
+#define CONTROL_REGISTER_4_MASK  0x11111111
+#define CONTROL_REGISTER_5_MASK  0x01001111
+#define CONTROL_REGISTER_6_MASK  0x00011111
+#define CONTROL_REGISTER_7_MASK  0x00011111
+#define CONTROL_REGISTER_8_MASK  0x11011111
+#define CONTROL_REGISTER_9_MASK  0x00000111
+#define CONTROL_REGISTER_10_MASK 0x00011111
 
 typedef union {
 	struct {
 		// This register is READ ONLY
-		bool MTR_LOCK :1; // Motor Lock
-		bool BK_FLT :1; // Buck Fault
-		bool SPI_FLT :1; // SPI Fault
-		bool OCP :1; // Over Current Protection Status
-		bool NPOR :1; // Supply Power On Reset
-		bool OVP :1; // Supply Overvoltage Protection Status
-		bool OT :1; // Overtemperature Fault
 		bool FAULT :1; // Device Fault
+		bool OT :1; // Overtemperature Fault
+		bool OVP :1; // Supply Overvoltage Protection Status
+		bool NPOR :1; // Supply Power On Reset
+		bool OCP :1; // Over Current Protection Status
+		bool SPI_FLT :1; // SPI Fault
+		bool BK_FLT :1; // Buck Fault
+		bool MTR_LOCK :1; // Motor Lock
 	} fields;
 	uint8_t data;
 } IC_Status_Register;
-
 
 // IC_Status_Register1
 #define STATUS_REGISTER_1_OTW_NO_FAULT_CONDITION_DETECTED 0x0
@@ -115,19 +121,17 @@ typedef union {
 typedef union {
 	struct {
 		// This register is READ ONLY
-		bool OTW :1; // Overtemperature Warning
-		bool OTS :1; // Overtemperature Shutdown
-		bool OCP_HC :1; // Overcurrent on High-side switch OUTC
-		bool OCL_LC :1; // Overcurrent on Low-side switch OUTC
-		bool OCP_HB :1; // Overcurrent on High-side switch OUTB
-		bool OCP_LB :1; // Overcurrent on Low-side switch OUTB
-		bool OCP_HA :1; // Overcurrent on High-side switch OUTA
 		bool OCP_LA :1; // Overcurrent on Low-side switch OUTA
+		bool OCP_HA :1; // Overcurrent on High-side switch OUTA
+		bool OCP_LB :1; // Overcurrent on Low-side switch OUTB
+		bool OCP_HB :1; // Overcurrent on High-side switch OUTB
+		bool OCL_LC :1; // Overcurrent on Low-side switch OUTC
+		bool OCP_HC :1; // Overcurrent on High-side switch OUTC
+		bool OTS :1; // Overtemperature Shutdown
+		bool OTW :1; // Overtemperature Warning
 	} fields;
 	uint8_t data;
 } IC_Status_Register1;
-
-
 
 // IC_Status_Register2
 #define STATUS_REGISTER_2_OTP_ERR_NO_OTP_ERROR_DETECTED 0
@@ -153,18 +157,17 @@ typedef union {
 typedef union {
 	struct {
 		// This register is READ ONLY
-		bool RESERVED :1; // RESERVED
-		bool OTP_ERR :1; // One Time Programmability Error
-		bool BUCK_OCP :1; // Buck Regulator Overcurrent Status
-		bool BUCK_UV :1; // Buck Regulator Undervoltage Status
-		bool VCP_UV :1; // Charge Pump Undervoltage
-		bool SPI_PARITY :1; // SPI Parity Error
-		bool SPI_SCLK_FLT :1; // SPI Clock Framing Error
 		bool SPI_ADDR_FLT :1; //SPI Address Error
+		bool SPI_SCLK_FLT :1; // SPI Clock Framing Error
+		bool SPI_PARITY :1; // SPI Parity Error
+		bool VCP_UV :1; // Charge Pump Undervoltage
+		bool BUCK_UV :1; // Buck Regulator Undervoltage Status
+		bool BUCK_OCP :1; // Buck Regulator Overcurrent Status
+		bool OTP_ERR :1; // One Time Programmability Error
+		bool RESERVED :1; // RESERVED
 	} fields;
 	uint8_t data;
 } IC_Status_Register2;
-
 
 // IC_Control_Register1
 #define CONTROL_REGISTER_1_REG_LOCK_NO_EFFECT_UNLESS_LOCKED_OR_UNLOCKED 0x0
@@ -178,13 +181,11 @@ typedef union {
 typedef union {
 	struct {
 		// Bit 7-3 Reserved
-		uint8_t RESERVED :5; // RESERVED
 		uint8_t REG_LOCK :3; // Register Lock
+		uint8_t RESERVED :5; // RESERVED
 	} fields;
 	uint8_t data;
 } IC_Control_Register1;
-
-
 
 // IC_Control_Register2
 #define CONTROL_REGISTER_2_SDO_MODE_SDO_IO_IN_OPEN_DRAIN_MODE 0x00
@@ -205,11 +206,11 @@ typedef union {
 typedef union {
 	struct {
 		// Bit 7-6 Reserved
-		uint8_t RESERVED :2; // RESERVED
-		bool SDO_MODE :1; // SDO Mode Setting
-		uint8_t SLEW :2; // Slew Rrate Settings
-		uint8_t PWM_MODE :2; // Device Mode Selection
 		bool CLR_FLAG :1; // Clear Fault
+		uint8_t PWM_MODE :2; // Device Mode Selection
+		uint8_t SLEW :2; // Slew Rrate Settings
+		bool SDO_MODE :1; // SDO Mode Setting
+		uint8_t RESERVED :2; // RESERVED
 	} fields;
 	uint8_t data;
 } IC_Control_Register2;
@@ -229,17 +230,15 @@ typedef union {
 typedef union {
 	struct {
 		// Bit 7-5 Reserved
-		uint8_t RESERVED :3; // RESERVED
-		bool PWM_100_DUTY_SEL :1; // frequency of PWM at 100% Duty Cycle
-		bool OVP_SEL :1; // Overvoltage Level Bit
-		bool OVP_EN :1; // Overvoltage Enable Bit
-		bool RESERVED_2 :1; // RESERVED
 		bool OTW_REP :1; // Overtemperature Waring Reporting Bit
+		bool RESERVED_2 :1; // RESERVED
+		bool OVP_EN :1; // Overvoltage Enable Bit
+		bool OVP_SEL :1; // Overvoltage Level Bit
+		bool PWM_100_DUTY_SEL :1; // frequency of PWM at 100% Duty Cycle
+		uint8_t RESERVED :3; // RESERVED
 	} fields;
 	uint8_t data;
 } IC_Control_Register3;
-
-
 
 // IC_Control_Register4
 #define CONTROL_REGISTER_4_DRV_OFF_NO_ACTION 0x00
@@ -265,17 +264,15 @@ typedef union {
 #define CONTROL_REGISTER_4_OCP_MODE_NOT_REPORTED 0x03
 typedef union {
 	struct {
-		bool DRV_OFF :1; // Driver Off Bit
-		bool OCP_CBC :1; // OCP PWM Cycle Operation Bit
-		uint8_t OCP_DEG :2; // OCP Deglitch Time Settings
-		bool OCP_RETRY :1; // OCP Retry Time Settings
-		bool OCP_LVL :1; // Overcurrent Level Setting
 		uint8_t OCP_MODE :2; // OCP Fault Options
+		bool OCP_LVL :1; // Overcurrent Level Setting
+		bool OCP_RETRY :1; // OCP Retry Time Settings
+		uint8_t OCP_DEG :2; // OCP Deglitch Time Settings
+		bool OCP_CBC :1; // OCP PWM Cycle Operation Bit
+		bool DRV_OFF :1; // Driver Off Bit
 	} fields;
 	uint8_t data;
 } IC_Control_Register4;
-
-
 
 // IC_Control_Register5
 #define CONTROL_REGISTER_5_ILIM_RECIR_BRAKE_MODE 0x00
@@ -294,18 +291,16 @@ typedef union {
 
 typedef union {
 	struct {
-		bool RESERVED :1; // RESERVED
-		bool ILIM_RECIR :1; // Current Limit Recicurcaltion Settings
-		bool RESERVED_1 :1; // RESERVED
-		bool RESERVED_2 :1; // RESERVED
-		bool EN_AAR :1; // Active Asynchronus Rectification Enable Bit
-		uint8_t EN_ASR :1; // Active Synchronus Rectification Enable Bit
 		uint8_t CSA_GAIN :2; // Current Sense Amplifiers Gain Settings
+		uint8_t EN_ASR :1; // Active Synchronus Rectification Enable Bit
+		bool EN_AAR :1; // Active Asynchronus Rectification Enable Bit
+		bool RESERVED_2 :1; // RESERVED
+		bool RESERVED_1 :1; // RESERVED
+		bool ILIM_RECIR :1; // Current Limit Recicurcaltion Settings
+		bool RESERVED :1; // RESERVED
 	} fields;
 	uint8_t data;
 } IC_Control_Register5;
-
-
 
 // IC_Control_Register6
 #define CONTROL_REGISTER_6_BUCK_PS_DIS_ENABLED 0x00
@@ -323,19 +318,15 @@ typedef union {
 #define CONTROL_REGISTER_6_BUCK_DISABLED 0x01
 typedef union {
 	struct {
-		uint8_t RESERVED :2; // RESERVED
-		bool RESERVED_1 :1; // RESERVED
-		bool BUCK_PS_DIS :1; // Buck Power Sequencing Disable Bit
-		bool BUCK_CL :1; // Buck Current Limit Setting
-		uint8_t BUCK_SEL :2; // Buck Voltage Selection
 		bool BUCK_DIS :1; // Buck Disable Bit
-
+		uint8_t BUCK_SEL :2; // Buck Voltage Selection
+		bool BUCK_CL :1; // Buck Current Limit Setting
+		bool BUCK_PS_DIS :1; // Buck Power Sequencing Disable Bit
+		bool RESERVED_1 :1; // RESERVED
+		uint8_t RESERVED :2; // RESERVED
 	} fields;
 	uint8_t data;
 } IC_Control_Register6;
-
-
-
 
 // IC_Control_Register7
 #define CONTROL_REGISTER_7_HALL_HYS_5MV 0x00
@@ -354,18 +345,15 @@ typedef union {
 #define CONTROL_REGISTER_7_DIR_CCW 0x01
 typedef union {
 	struct {
-		uint8_t RESERVED :3; // RESERVED
-		bool HALL_HYS :1; // Hall Comparator Hysteresis Settings
-		bool BRAKE_MODE :1; //Brake Mode Setting
-		bool COAST :1; // Coast Bit
-		bool BRAKE :1; // Brake Bit
 		bool DIR :1; // Direction Bit
-
+		bool BRAKE :1; // Brake Bit
+		bool COAST :1; // Coast Bit
+		bool BRAKE_MODE :1; //Brake Mode Setting
+		bool HALL_HYS :1; // Hall Comparator Hysteresis Settings
+		uint8_t RESERVED :3; // RESERVED
 	} fields;
 	uint8_t data;
 } IC_Control_Register7;
-
-
 
 // IC_Control_Register8
 #define CONTROL_REGISTER_8_FGOUT_SEL_3X_COMM_FREQ 0x00
@@ -387,18 +375,14 @@ typedef union {
 #define CONTROL_REGISTER_8_MTR_LOCK_MODE_NO_REPORT 0x03
 typedef union {
 	struct {
-		uint8_t FGOUT_SEL :2; // Electrical Frequency Generation Output Mode Bits
-		bool RESERVED :1; //RESERVED
-		bool MTR_LOCK_RETRY :1; // Motor Lock Retry Time Settings
-		uint8_t MTR_LOCK_TDET :2; // Motor Lock Detection Time Settings
 		uint8_t MTR_LOCK_MODE :2; // Motor Lock Fault Options
-
+		uint8_t MTR_LOCK_TDET :2; // Motor Lock Detection Time Settings
+		bool MTR_LOCK_RETRY :1; // Motor Lock Retry Time Settings
+		bool RESERVED :1; //RESERVED
+		uint8_t FGOUT_SEL :2; // Electrical Frequency Generation Output Mode Bits
 	} fields;
 	uint8_t data;
 } IC_Control_Register8;
-
-
-
 
 // IC_Control_Register9
 #define CONTROL_REGISTER_9_ADVANCE_LVL_0DEG 0x00
@@ -411,13 +395,11 @@ typedef union {
 #define CONTROL_REGISTER_9_ADVANCE_LVL_30DEG 0x07
 typedef union {
 	struct {
-		uint8_t RESERVED :5; // RESERVED
 		uint8_t ADVANCED_LVL :3; // Phase Advance Settings
+		uint8_t RESERVED :5; // RESERVED
 	} fields;
 	uint8_t data;
 } IC_Control_Register9;
-
-
 
 // IC_Control_Register10
 #define CONTROL_REGISTER_10_DLYCMP_EN_DISABLE 0x00
@@ -441,20 +423,18 @@ typedef union {
 #define CONTROL_REGISTER_10_DLY_TARGET_3200US 0x0F
 typedef union {
 	struct {
-		uint8_t RESERVED :3; // RESERVED
-		bool DLYCMP_EN :1; // Driver Delay Compensation enable
 		uint8_t DLY_TARGET :4; //Delay Target Driver Delay Compensation
+		bool DLYCMP_EN :1; // Driver Delay Compensation enable
+		uint8_t RESERVED :3; // RESERVED
 	} fields;
 	uint8_t data;
 } IC_Control_Register10;
 
-
-
 typedef struct {
 	/* I2C handle */
 	SPI_HandleTypeDef *spiHandle;
-	GPIO_TypeDef *GPIOx;
-	GPIO_InitTypeDef *GPIO_Init;
+	GPIO_TypeDef *NSS_Port;
+	uint16_t NSS_Pin;
 	IC_Status_Register statReg;
 	IC_Status_Register1 statReg1;
 	IC_Status_Register2 statReg2;
@@ -470,12 +450,13 @@ typedef struct {
 	IC_Control_Register10 ctrlReg10;
 } MCT8316;
 
-
-
 unsigned char parity_calc(unsigned char value);
-uint8_t MCT8316_Init(SPI_HandleTypeDef *hspi, MCT8316 *dev);
+uint8_t checkRegisterOnValue(MCT8316 *dev,uint8_t reg, uint8_t value);
+uint8_t MCT8316_Fault_Clear(MCT8316 *dev);
+uint8_t MCT8316_Init(SPI_HandleTypeDef *hspi,GPIO_TypeDef *NSS_Port,uint16_t NSS_Pin, MCT8316 *dev);
 HAL_StatusTypeDef MCT8316_Write(MCT8316 *dev, uint8_t *address, uint8_t *data, uint8_t *oldData);
 HAL_StatusTypeDef MCT8316_Read(MCT8316 *dev, uint8_t *address, uint8_t *data);
+uint8_t MCT8316_Write_Extern(MCT8316 *dev, uint8_t address, uint8_t *data);
 uint8_t statusRegisterFault(MCT8316 *dev);
 void errorHandler();
 #endif /* MCT8316Z_DRIVER_MCT8316Z_H_ */
