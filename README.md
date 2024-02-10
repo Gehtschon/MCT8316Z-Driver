@@ -3,4 +3,4 @@ Driver for the SPI variant of the MCT8316Z.
 This driver is written for ARM Cortex STM32 Processors.
 
 
-Note this project is under construction, no test was made
+This driver allows a simple SPI communication, with a digital replica of the chip register states.
