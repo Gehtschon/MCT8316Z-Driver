@@ -1,3 +1,245 @@
+# English
+German text is available after the the English section
+### Structure
+
+Communication between the MCU and the MCT8316Z takes place via SPI. The STM HAL library was used for communication via SPI. This controls the communication with
+the set parameters such as speed, data word width and bit order for the SPI bus. A struct with the name MCT8316 was created in the driver. This struct contains
+fields for the SPI bus used and the corresponding chip select pin. These fields are
+written with the init function. The ten registers of the MCT8316 are also stored in this struct
+are also stored in this struct. These registers were created as unions, which contain a struct. The struct
+contains the individual bits as readable names. This means that they can be written in a readable form. The entire register can be displayed or written with the uint8_t variable named data
+or described.
+
+``` {.objectivec language="C"}
+typedef union {
+ struct {
+	bool DRV_OFF :1; // Driver Off Bit
+	bool OCP_CBC :1; // OCP PWM Cycle Operation Bit
+	uint8_t OCP_DEG :2; // OCP Deglitch Time Settings
+	bool OCP_RETRY :1; // OCP Retry Time Settings
+	bool OCP_LVL :1; // Overcurrent Level Setting
+	uint8_t OCP_MODE :2; // OCP Fault Options
+} fields;
+ uint8_t data;
+} IC_Control_Register4;
+```
+
+| Field | Bits |
+|-----------|----------|
+| DRV_OFF | 7 |
+| OCP_CBC | 6 |
+| OCP_DEG | 5, 4 |
+| OCP_RETRY | 3 |
+| OCP_LVL | 2 |
+| OCP_MODE | 1, 0 |
+
+
+The code snippet corresponds to Table 4.9, which in turn corresponds to control register 4 of the driver chip. The table clearly shows that the fields and the variable Data are in the same memory area.
+are located in the same memory area.
+The MCT8316 struct ultimately has the structure from Table 4.10
+
+
+| Name | Type | Description |
+|------------|------------------------|----------------------------------------------------|
+| spiHandle | SPI_HandleTypeDef | Pointer to the SPI instance to be used |
+| NSS_Port | GPIO_TypeDef | Pointer to the port of the Chipselect pin |
+| NSS_Pin | uint16_t | Chipselect pin number |
+| statReg | IC_Status_Register | Information from status register 0 |
+| statReg1 | IC_Status_Register1 | Information from status register 1 |
+| statReg2 | IC_Status_Register2 | Information from status register 2 |
+| ctrlReg1 | IC_Control_Register1 | Information from control register 1 |
+| ctrlReg2 | IC_Control_Register2 | Information from control register 2 |
+| ctrlReg3 | IC_Control_Register3 | Information from control register 3 |
+| ctrlReg4 | IC_Control_Register4 | Information from control register 4 |
+| ctrlReg5 | IC_Control_Register5 | Information from control register 5 |
+| ctrlReg6 | IC_Control_Register6 | Information from control register 6 |
+| ctrlReg7 | IC_Control_Register7 | Information from control register 7 |
+| ctrlReg8 | IC_Control_Register8 | Information from control register 8 |
+| ctrlReg9 | IC_Control_Register9 | Information from control register 9 |
+| ctrlReg10 | IC_Control_Register10 | Information from control register 10 |
+
+### MCT8316 Initialization
+The initialization of the motor driver chip must be adapted to the specific project.For the
+used PCB in combination with the Maxon ECXSP16, the following parameters are set
+
+- Deactivate buck converter
+
+- Activate braking mode
+
+- Slew rate to 200V/us. This sets the speed at which the
+    [MOSFET]{acronym-label="MOSFET" acronym-form="singular+short"}'s
+    can switch between 20% and 80% voltage.
+
+- PWM]{acronym-label="PWM" acronym-form="singular+short"} Mode to
+    digital Hall sensors asynchronous motor (suitable for use with
+    Maxon motor)
+
+- Motor Lock Detection 5000mS and Motor Lock no report.These
+    settings are required for very low speeds and are changed dynamically during
+    changed dynamically during operation. See section**
+
+These are the start settings, certain parameters are adjusted during operation as described above.
+described above during operation.
+
+### MCT8316_Write
+
+The prototype of this function looks as follows:
+HAL_StatusTypeDef MCT8316_Write (MCT8316 ∗dev , uin t8_ t ∗ add re s s ,
+uin t8_ t ∗data , uin t8_ t ∗ oldData )
+The MCT8316_Write function requires the following transfer parameters.
+- Device
+- Address
+- oldData
+- oldData
+The data is written to the transferred address. As a return value, the chip sends the
+previously set data. If writing and reading was successful, the function HAL_OK
+returns.
+
+### MCT8316_Write_External
+
+To simplify writing from outside the driver software, the following function has been added to the
+function MCT8316_Write, the function MCT8316_Write_Extern was created. The prototype of this
+function looks as follows:
+uin t8_ t MCT8316_Write_Extern (MCT8316 ∗dev , uin t8_ t add re s sp ,
+uin t8_ t ∗ data )
+The MCT8316_Write function requires the following transfer parameters.
+- Device
+- Device address
+- Data
+The fundamental difference to the MCT8316_Write function is the error handling of this function. If this function is used, the fault bits are deleted before the write command.
+The deletion prevents error messages that are not current from being read out and
+lead to an error. If the write error worked, the return value of the function is
+0, otherwise a number greater than 0 (details are explained in the code)
+
+### MCT8316_Read
+
+The prototype of this function looks like this:
+HAL_StatusTypeDef MCT8316_Read(MCT8316 ∗dev , uin t8_ t ∗ add re s s ,
+uin t8_ t ∗ data )
+The MCT8316_Read function requires the following transfer parameters.
+- Device
+- Address
+- Data
+The read values are saved to Data. If the function was successful, this is confirmed with
+confirmed with a HAL_OK.
+
+### MCT8316 statusRegisterFault
+
+The prototype of this function looks as follows:
+uin t8_ t s t a t u s R e g i s t e r F a u l t (MCT8316 ∗dev )
+This function checks whether there is an error on the MCT8316. The return value is structured as follows
+is structured as follows:
+- Status register has an error: 1
+- Status register1 has an error: 10
+- Status register 2 has an error: 100
+- No error: 0
+The return value can also be a combination of the numbers if there are several errors.
+
+**Example** Status register1 and status register2 have an error.
+have an error. The return value is 110.
+
+### parity_calc
+
+The prototype of this function looks like this:
+
+``` {.objectivec language="C"}
+unsigned char parity_calc(unsigned char value)
+```
+
+This function is used purely internally in the driver. It calculates the
+parity bit of the transfer value. This function is required for
+SPI bus communication with the MCT8316 to calculate the parity bit. The
+parity bit is set so that the data word (16 bits) contains an even number of
+number of ones and zeros. The table
+shows the systematic structure of the word.
+can be seen in the table.
+
+The code snippet shows the function that calculates the parity bit
+is calculated. First, the transfer value is stored in the variable parity
+variable. Subsequently, an exclusive-or operation
+(XOR) and bit-shifting to determine the parity bit of the first 2 bits.
+This process is repeated for the first 4 bits, then for all 8 bits.
+all 8 bits. The result is stored in the least significant bit.
+The truth table of the XOR operation is shown in the table.
+
+| A | B | Y |
+|-----|-----|-----|
+| 0 | 0 | 0 |
+| 0 | 1 | 1 |
+| 1 | 0 | 1 |
+| 1 | 1 | 0 |
+
+::: listing
+``` c
+unsigned char parity_calc(unsigned char value) {
+	// Initialize a variable to hold the parity value
+	unsigned char parity = value;
+	// XOR value with itself shifted right by 1 bit to get
+    //the parity of the first 2 bits
+	parity = parity ^ (value >> 1);
+	// XOR the result with itself shifted right by 2 bits to get
+//the parity of the first 4 bits
+	parity = parity ^ (parity >> 2);
+	// XOR the result with itself shifted right by 4 bits to get
+// the parity of all 8 bits
+	parity = parity ^ (parity >> 4);
+	// The parity is the least significant bit of the result
+	return parity & 1;
+}
+```
+:::
+
+In the MCT8316 driver, the parity bit of the first byte is calculated first.
+is calculated, which consists of the read/write bit and the address.
+The parity bit is then calculated from the second byte, which consists of the payload
+is used to calculate the parity bit. The code is shown in the code snippet
+is shown. After the two parity bits have been calculated separately,
+they are offset by an XOR operation, which produces the overall result.
+result. The calculated result corresponds to the parity bit of the
+data word. The data word is formed in the last two lines of the
+code snippet.
+
+::: listing
+``` c
+	// Calculate the parity of the data
+	unsigned char parity_1 = parity_calc((rw << 7) | (*address << 1));
+	unsigned char parity_2 = parity_calc(*data);
+
+	// the parity is for the whole
+	unsigned char parity = parity_1 ^ parity_2;
+
+    // First byte: R/W, address, parity
+    pTxData[0] = (rw << 7) | (*address << 1) | (parity); 
+    pTxData[1] = *data; // Second byte: data
+```
+:::
+
+### checkRegisterOnValue 
+The prototype of this function looks like this:
+uin t8_ t checkRe gi s te rOnV alue (MCT8316 ∗dev , uin t8_ t reg , uin t8_ t v al u e )
+The checkRegisterOnValue function requires the following transfer parameters.
+- Device
+- The register to be checked
+- The value to be checked
+This function checks whether a specific value occurs in a specific register (reg).
+occurs. If this is the case, a 1 is returned, otherwise a 0. If the register does not exist, 99 is returned. The register that is to be checked is linked bit by bit with
+a specific mask bit by bit. The mask excludes bits that contain a random,
+undefined value. It is IMPORTANT that the register to be checked is first linked with the
+MCT8316_Read function, this is not part of this function.
+Table 4.13 contains an example of the bit mask. The existing register
+has a value at bit 5, which is not of interest. The mask is ANDed with the value
+of the register AND-linked. As bit 5 of the mask is 0, the result at bit 5 will always be
+will always contain a 0. This means that the result can be analyzed without a randomly dependent
+value occurs in the register
+
+### MCT8316_Fault_Clear 
+
+The prototype of this function looks as follows:
+uin t8_ t MCT8316_Fault_Clear (MCT8316 ∗dev )
+This function resets the error register of the MCT8316. If the reset was successful
+was successful, a 0 is returned, otherwise a 1.
+
+#German / Deutsch
 ### Aufbau
 
 Die Kommunikation zwischen der MCU und dem MCT8316Z erfolgt per SPI. Für die Kommunikation per SPI wurde die STM HAL-Library verwendet. Diese regelt die Kommunikation mit
