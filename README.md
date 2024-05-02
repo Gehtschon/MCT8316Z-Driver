@@ -1,34 +1,11 @@
-## MCT8316 Treiber {#MCT8316-Treiber}
+### Aufbau
 
-Für den Motortreiberchip MCT8316 wurde ein Treiber geschrieben, um
-einfach mit dem Chip per [SPI]{acronym-label="SPI"
-acronym-form="singular+short"} zu kommunizieren. In den folgenden
-Kapiteln wird darauf eingegangen, wie dies im Detail funktioniert. Ein
-Teil der Informationen wurde bereits im Bericht zum Projekt 5
-([@P5:P5Arbeit]) abgehandelt und wird im Verlauf der folgenden Kapitel
-in überarbeiteter Form wieder aufgegriffen. Jede Funktion wurde
-überarbeitet. Somit empfiehlt sich die Verwendung dieses Berichts zur
-Informationsbeschaffung.
-
-### Aufbau {#chap:Aufbau-der-Library .unnumbered}
-
-Die Kommunikation zwischen der [MCU]{acronym-label="MCU"
-acronym-form="singular+short"} und dem MCT8316Z erfolgt per
-[SPI]{acronym-label="SPI" acronym-form="singular+short"}. Für die
-Kommunikation per [SPI]{acronym-label="SPI"
-acronym-form="singular+short"} wurde die STM [HAL]{acronym-label="HAL"
-acronym-form="singular+short"}-Library verwendet. Diese regelt die
-Kommunikation mit den eingestellten Parameter wie Geschwindigkeit,
-Datenwortbreite und Bit-Order für den [SPI]{acronym-label="SPI"
-acronym-form="singular+short"}-Bus. Im Treiber wurde ein Struct mit dem
-Namen MCT8316 erstellt. Dieses Struct beinhaltet Felder für den benutzen
-[SPI]{acronym-label="SPI" acronym-form="singular+short"}-Bus und den
-dazugehörigen Chipselect Pin. Diese Felder werden mit der init-Funktion
-beschrieben. Die zehn Register des MCT8316 sind auch in diesem Struct
-abgelegt. Diese Register wurden als Unions erstellt, welche ein Struct
-beinhalten. Das Struct beinhaltet die einzelnen Bits als lesbare Namen.
-Somit können diese in einer lesbaren Form beschrieben werden. Das
-gesamte Register kann mit der uint8_t Variable namens data dargestellt
+Die Kommunikation zwischen der MCU und dem MCT8316Z erfolgt per SPI. Für die Kommunikation per SPI wurde die STM HAL-Library verwendet. Diese regelt die Kommunikation mit
+den eingestellten Parameter wie Geschwindigkeit, Datenwortbreite und Bit-Order für den SPIBus. Im Treiber wurde ein Struct mit dem Namen MCT8316 erstellt. Dieses Struct beinhaltet
+Felder für den benutzen SPI-Bus und den dazugehörigen Chipselect Pin. Diese Felder werden
+mit der init-Funktion beschrieben. Die zehn Register des MCT8316 sind auch in diesem Struct
+abgelegt. Diese Register wurden als Unions erstellt, welche ein Struct beinhalten. Das Struct
+beinhaltet die einzelnen Bits als lesbare Namen. Somit können diese in einer lesbaren Form beschrieben werden. Das gesamte Register kann mit der uint8_t Variable namens data dargestellt
 oder beschrieben werden.
 
 ``` {.objectivec language="C"}
@@ -58,15 +35,10 @@ typedef union {
   : Union Aufbau, [@P5:P5Arbeit].
 :::
 
-Das Codesnippet entspricht der Tabelle
-[1](#tab:Union-Aufbau){reference-type="ref"
-reference="tab:Union-Aufbau"}, welche wiederum dem Controlregister 4 des
-Treiberchips entspricht. In der Tabelle ist gut zu sehen, dass die
-Fields und die Variable Data auf dem gleichen Speicherbereich liegen.
+Das Codesnippet entspricht der Tabelle 4.9, welche wiederum dem Controlregister 4 des Treiberchips entspricht. In der Tabelle ist gut zu sehen, dass die Fields und die Variable Data auf
+dem gleichen Speicherbereich liegen.
+Das MCT8316 Struct hat schlussendlich den Aufbau aus Tabelle 4.10
 
-Das MCT8316 Struct hat schlussendlich den Aufbau aus Tabelle
-[2](#tab:MCT8316-Struct){reference-type="ref"
-reference="tab:MCT8316-Struct"}
 
 ::: {#tab:MCT8316-Struct}
   MCT8316 Struct                           
@@ -92,12 +64,10 @@ reference="tab:MCT8316-Struct"}
   : MCT8316 Struct.
 :::
 
-### MCT8316 Initialisation {#Initialisation-MCT .unnumbered}
+### MCT8316 Initialisation
 
-Die Initialisierung des Motorentreiberchips muss projektspezifisch
-angepasst werden. Für das benutzte [PCB]{acronym-label="PCB"
-acronym-form="singular+short"} in Kombination mit dem Maxon ECXSP16,
-werden folgende Parameter gesetzt.
+Die Initialisierung des Motorentreiberchips muss projektspezifisch angepasst werden. Für das
+benutzte PCB in Kombination mit dem Maxon ECXSP16, werden folgende Parameter gesetzt
 
 -   Buck Converter deaktivieren
 
@@ -113,107 +83,69 @@ werden folgende Parameter gesetzt.
 
 -   Motor Lock Detection 5000mS und Motor Lock kein Report. Diese
     Einstellungen sind für sehr kleine Drehzahlen nötig und wird während
-    dem Betriebe dynamisch geändert. Siehe Abschnitt
+    dem Betriebe dynamisch geändert. Siehe Abschnitt**
 
 Dies sind die Starteinstellungen, gewisse Parameter werden wie oben
 beschrieben während des Betriebes angepasst.
 
-### MCT8316_Write {#MCT8316-Write .unnumbered}
+### MCT8316_Write
 
 Der Prototyp dieser Funktion sieht wie folgt aus:
-
-``` {.objectivec language="C"}
-HAL_StatusTypeDef MCT8316_Write(MCT8316 *dev, uint8_t *address,
- uint8_t *data,uint8_t *oldData)
-```
-
+HAL_StatusTypeDef MCT8316_Write (MCT8316 ∗dev , uin t8_ t ∗ add re s s ,
+uin t8_ t ∗data , uin t8_ t ∗ oldData )
 Die Funktion MCT8316_Write benötigt folgende Übergabeparameter.
+• Device
+• Adresse
+• Data
+• oldData
+Die Daten werden auf die übergebene Adresse geschrieben. Als Rückgabewert sendet der Chip die
+vorher gesetzten Daten. War das Schreiben und Lesen erfolgreich, gibt die Funktion HAL_OK
+zurück.
 
--   Device
+### MCT8316_Write_Extern
 
--   Adresse
-
--   Data
-
--   oldData
-
-Die Daten werden auf die übergebene Adresse geschrieben. Als
-Rückgabewert sendet der Chip die vorher gesetzten Daten. War das
-Schreiben und Lesen erfolgreich, gibt die Funktion HAL_OK zurück.
-
-### MCT8316_Write_Extern {#MCT8316-Write-Extern .unnumbered}
-
-Um das Beschreiben von ausserhalb der Treibersoftware zu vereinfachen,
-wurde zusätzlich zur Funktion MCT8316_Write, die Funktion
-MCT8316_Write_Extern erstellt. Der Prototyp dieser Funktion sieht wie
-folgt aus:
-
-``` {.objectivec language="C"}
-uint8_t MCT8316_Write_Extern(MCT8316 *dev, uint8_t addressp,
-uint8_t *data)
-```
-
+Um das Beschreiben von ausserhalb der Treibersoftware zu vereinfachen, wurde zusätzlich zur
+Funktion MCT8316_Write, die Funktion MCT8316_Write_Extern erstellt. Der Prototyp dieser
+Funktion sieht wie folgt aus:
+uin t8_ t MCT8316_Write_Extern (MCT8316 ∗dev , uin t8_ t add re s sp ,
+uin t8_ t ∗ data )
 Die Funktion MCT8316_Write benötigt folgende Übergabeparameter.
-
--   Device
-
--   Adresse
-
--   Data
-
-Der grundlegende Unterschied zur Funktion ist das Errorhandling dieser
-Funktion. Wenn diese Funktion verwendet wird, werden die Fault Bits vor
-dem Schreibbefehl gelöscht. Mit dem Löschen wird verhindert, dass nicht
-aktuelle Fehlermeldungen ausgelesen werden und zu einem Fehler führen.
-Wenn der Schreibfehler funktionierte, ist der Rückgabewert der Funktion
+• Device
+• Adresse
+• Data
+Der grundlegende Unterschied zur Funktion MCT8316_Write ist das Errorhandling dieser Funktion. Wenn diese Funktion verwendet wird, werden die Fault Bits vor dem Schreibbefehl gelöscht.
+Mit dem Löschen wird verhindert, dass nicht aktuelle Fehlermeldungen ausgelesen werden und
+zu einem Fehler führen. Wenn der Schreibfehler funktionierte, ist der Rückgabewert der Funktion
 0, ansonsten eine Zahl grösser 0. (Details sind im Code erläutert)
 
-### MCT8316_Read {#MCT8316-Read .unnumbered}
+### MCT8316_Read
 
 Der Prototyp dieser Funktion sieht wie folgt aus:
-
-``` {.objectivec language="C"}
-HAL_StatusTypeDef MCT8316_Read(MCT8316 *dev, uint8_t *address,
- uint8_t *data)
-```
-
+HAL_StatusTypeDef MCT8316_Read(MCT8316 ∗dev , uin t8_ t ∗ add re s s ,
+uin t8_ t ∗ data )
 Die Funktion MCT8316_Read benötigt folgende Übergabeparameter.
+• Device
+• Adresse
+• Data
+Die gelesenen Werte werden auf Data abgespeichert. War die Funktion erfolgreich, wird dies mit
+einem HAL_OK bestätigt.
 
--   Device
-
--   Adresse
-
--   Data
-
-Die gelesenen Werte werden auf Data abgespeichert. War die Funktion
-erfolgreich, wird dies mit einem HAL_OK bestätigt.
-
-### MCT8316 statusRegisterFault {#MCT8316-statusRegisterFault .unnumbered}
+### MCT8316 statusRegisterFault
 
 Der Prototyp dieser Funktion sieht wie folgt aus:
-
-``` {.objectivec language="C"}
-uint8_t statusRegisterFault(MCT8316 *dev)
-```
-
-Diese Funktion prüft, ob ein Fehler auf dem MCT8316 vorliegt. Der
-Rückgabewert ist wie folgt aufgebaut:
-
--   Statusregister hat einen Fehler: 1
-
--   Statusregister1 hat einen Fehler: 10
-
--   Statusregister2 hat einen Fehler: 100
-
--   Kein Fehler: 0
-
-Der Rückgabewert kann auch eine Kombination der Zahlen sein, falls
-mehrere Fehler vorliegen.
+uin t8_ t s t a t u s R e g i s t e r F a u l t (MCT8316 ∗dev )
+Diese Funktion prüft, ob ein Fehler auf dem MCT8316 vorliegt. Der Rückgabewert ist wie folgt
+aufgebaut:
+• Statusregister hat einen Fehler: 1
+• Statusregister1 hat einen Fehler: 10
+• Statusregister2 hat einen Fehler: 100
+• Kein Fehler: 0
+Der Rückgabewert kann auch eine Kombination der Zahlen sein, falls mehrere Fehler vorliegen.
 
 **Beispiel** Statusregister1 und Statusregister2 weisen einen Fehler
 auf. Der Rückgabewert beträgt 110.
 
-### parity_calc {#paritycalc .unnumbered}
+### parity_calc
 
 Der Prototyp dieser Funktion sieht wie folgt aus:
 
@@ -223,12 +155,10 @@ unsigned char parity_calc(unsigned char value)
 
 Diese Funktion wird rein intern im Treiber benutzt. Sie berechnet das
 Paritätsbit des Übergabewertes. Diese Funktion wird benötigt, um bei der
-[SPI]{acronym-label="SPI" acronym-form="singular+short"}-Bus
-Kommunikation, mit dem MCT8316, das Paritätsbit zu berechnen. Das
+SPI-Bus Kommunikation, mit dem MCT8316, das Paritätsbit zu berechnen. Das
 Paritätsbit wird so gesetzt, dass im Datenwort (16 Bit's) eine gerade
 Anzahl von Einsen und Nullen vorkommt. In der Tabelle
-[\[tab:Aufbau-Word\]](#tab:Aufbau-Word){reference-type="ref"
-reference="tab:Aufbau-Word"} ist der systematische Aufbau des Wortes zu
+ist der systematische Aufbau des Wortes zu
 sehen.
 
 Im Code-Snippet ist die Funktion zu sehen, welche das Paritätsbit
@@ -282,9 +212,7 @@ dargestellt. Nachdem die beiden Paritätsbits separat berechnet wurden,
 werden sie durch eine XOR Verknüpfung verrechnet, was zum Gesamtresultat
 führt. Das berechnete Resultat entspricht dem Paritätsbit des
 Datenwortes. Das Datenwort wird in den letzten beiden Zeilen des
-Codesnippets gebildete und entspricht dem Aufbau aus Tabelle
-[\[tab:Aufbau-Word\]](#tab:Aufbau-Word){reference-type="ref"
-reference="tab:Aufbau-Word"}.
+Codesnippets gebildete.
 
 ::: listing
 ``` c
@@ -301,65 +229,30 @@ reference="tab:Aufbau-Word"}.
 ```
 :::
 
-### checkRegisterOnValue {#checkRegisterOnValue .unnumbered}
-
+### checkRegisterOnValue 
 Der Prototyp dieser Funktion sieht wie folgt aus:
-
-``` {.objectivec language="C"}
-uint8_t checkRegisterOnValue(MCT8316 *dev,uint8_t reg, uint8_t value) 
-```
-
+uin t8_ t checkRe gi s te rOnV alue (MCT8316 ∗dev , uin t8_ t reg , uin t8_ t v al u e )
 Die Funktion checkRegisterOnValue benötigt folgende Übergabeparameter.
+• Device
+• Das zu prüfendes Register
+• Der zu prüfende Wert
+Diese Funktion überprüft, ob ein bestimmter Wert (value) in einem bestimmten Register (reg)
+auftritt. Falls dies der Fall ist, wird eine 1 zurückgegeben, andernfalls eine 0. Wenn das Register nicht existiert, wird 99 zurückgegeben. Das Register, das überprüft werden soll, wird mit
+einer spezifischen Maske bitweise verknüpft. Die Maske exkludiert Bits, welche einen zufälligen,
+nicht definierten Wert enthalten. WICHTIG ist, dass zuerst das zu prüfende Register mit der
+MCT8316_Read Funktion gelesen werden muss, dies ist nicht Bestandteil dieser Funktion.
+In der Tabelle 4.13 ist ein Beispiel zu der Bit Maske vorhanden. Das vorhandene Register
+besitzt einen Wert bei Bit 5, welcher nicht von Interesse ist. Die Maske wird mit dem Wert
+des Registers UND-Verknüpft. Da das Bit 5 der Maske 0 ist, wird im Resultat bei Bit 5 immer
+eine 0 stehen. Somit kann das Resultat analysiert werden, ohne dass ein vom Zufall abhängiger
+Wert im Register vorkommt
 
--   Device
-
--   Das zu prüfendes Register
-
--   Der zu prüfende Wert
-
-Diese Funktion überprüft, ob ein bestimmter Wert (value) in einem
-bestimmten Register (reg) auftritt. Falls dies der Fall ist, wird eine 1
-zurückgegeben, andernfalls eine 0. Wenn das Register nicht existiert,
-wird 99 zurückgegeben. Das Register, das überprüft werden soll, wird mit
-einer spezifischen Maske bitweise verknüpft. Die Maske exkludiert Bits,
-welche einen zufälligen, nicht definierten Wert enthalten. **WICHTIG**
-ist, dass zuerst das zu prüfende Register mit der MCT8316_Read Funktion
-gelesen werden muss, dies ist nicht Bestandteil dieser Funktion.
-
-In der Tabelle
-[\[tab:Bitmaske Besipiel\]](#tab:Bitmaske Besipiel){reference-type="ref"
-reference="tab:Bitmaske Besipiel"} ist ein Beispiel zu der Bit Maske
-vorhanden. Das vorhandene Register besitzt einen Wert bei Bit 5, welcher
-nicht von Interesse ist. Die Maske wird mit dem Wert des Registers
-UND-Verknüpft. Da das Bit 5 der Maske 0 ist, wird im Resultat bei Bit 5
-immer eine 0 stehen. Somit kann das Resultat analysiert werden, ohne
-dass ein vom Zufall abhängiger Wert im Register vorkommt.
-
-### MCT8316_Fault_Clear {#MCT8316_Fault_Clear .unnumbered}
+### MCT8316_Fault_Clear 
 
 Der Prototyp dieser Funktion sieht wie folgt aus:
+uin t8_ t MCT8316_Fault_Clear (MCT8316 ∗dev )
+Diese Funktion setzt das Fehlerregister des MCT8316 zurück. Wenn das Rücksetzten erfolgreich
+war, wird eine 0 zurückgegeben, ansonsten eine 1.
 
-``` {.objectivec language="C"}
-uint8_t MCT8316_Fault_Clear(MCT8316 *dev)
-```
-
-Diese Funktion setzt das Fehlerregister des MCT8316 zurück. Wenn das
-Rücksetzten erfolgreich war, wird eine 0 zurückgegeben, ansonsten eine
-1.
-
-### MCT8316 SPI Geschwindigkeit {#SPI-Geschwindigkeit .unnumbered}
-
-In der Testphase wurde nach langem Testen und Debuggen festgestellt,
-dass höchstwahrscheinlich das Datenblatt des MCT8316 einen Fehler
-bezüglich der maximalen Datenrate enthält. Das Datenblatt weist eine
-Geschwindigkeit des [SPI]{acronym-label="SPI"
-acronym-form="singular+short"} Bus von 5 MHz aus. Diese konnte aber erst
-nach einem gesendeten Paket mit langsamer Geschwindigkeit (3 MHz) voll
-ausgenutzt werden. Somit wurde die Geschwindigkeit auf 3 MHz gedrosselt.
-Details sind dazu im Kapitel
-[\[Clock-Configuration\]](#Clock-Configuration){reference-type="ref"
-reference="Clock-Configuration"} zu finden. Um sicherzugehen wurden die
-Daten mit einem Protocol Analyzer geprüft, dies zeigte auf, dass die
-Daten mit 5 MHz richtig versendet worden sind, aber offenbar vom Chip
 nicht verarbeitet werden konnten. Mit der gedrosselten Geschwindigkeit
 passierte dies nicht.
