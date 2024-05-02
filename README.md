@@ -22,18 +22,15 @@ typedef union {
 } IC_Control_Register4;
 ```
 
-::: {#tab:Union-Aufbau}
-        **Field**   **Bits**
-  ----- ----------- ----------
-  2-3   DRV_OFF     7
-  2-3   OCP_CBC     6
-  2-3   OCP_DEG     5, 4
-  2-3   OCP_RETRY   3
-  2-3   OCP_LVL     2
-  2-3   OCP_MODE    1, 0
+| Field     | Bits     |
+|-----------|----------|
+| DRV_OFF   | 7        |
+| OCP_CBC   | 6        |
+| OCP_DEG   | 5, 4     |
+| OCP_RETRY | 3        |
+| OCP_LVL   | 2        |
+| OCP_MODE  | 1, 0     |
 
-  : Union Aufbau, [@P5:P5Arbeit].
-:::
 
 Das Codesnippet entspricht der Tabelle 4.9, welche wiederum dem Controlregister 4 des Treiberchips entspricht. In der Tabelle ist gut zu sehen, dass die Fields und die Variable Data auf
 dem gleichen Speicherbereich liegen.
@@ -163,20 +160,15 @@ abgespeichert. Anschliessend wird durch eine Exklusiv-Oder Verknüpfung
 (XOR) und Bit-shifting das Paritätsbit der ersten 2 Bits bestimmt.
 Dieser Vorgang wird für die ersten 4 Bits wiederholt, anschliessend für
 alle 8 Bits. Das Resultat ist im wenigstens signifikanten Bit abgelegt.
-Die Wahrheitstabelle der XOR Verknüpfung ist in Tabelle
-[3](#tab:XOR Warheitstabelle){reference-type="ref"
-reference="tab:XOR Warheitstabelle"} dargestellt.
+Die Wahrheitstabelle der XOR Verknüpfung ist in Tabelle dargestellt.
 
-::: {#tab:XOR Warheitstabelle}
-  A   B   Y
-  --- --- ---
-  0   0   0
-  0   1   1
-  1   0   1
-  1   1   0
+| A   | B   | Y   |
+|-----|-----|-----|
+| 0   | 0   | 0   |
+| 0   | 1   | 1   |
+| 1   | 0   | 1   |
+| 1   | 1   | 0   |
 
-  : Wahrheitstabelle XOR.
-:::
 
 ::: listing
 ``` c
