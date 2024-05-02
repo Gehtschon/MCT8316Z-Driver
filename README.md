@@ -40,29 +40,25 @@ dem gleichen Speicherbereich liegen.
 Das MCT8316 Struct hat schlussendlich den Aufbau aus Tabelle 4.10
 
 
-::: {#tab:MCT8316-Struct}
-  MCT8316 Struct                           
-  ---------------- ----------------------- --------------------------------------------
-  Name             Typ                     Beschreibung
-  \*spiHandle      SPI_HandleTypeDef       Pointer auf die zu verwendende SPI-Instanz
-  \*NSS_Port       GPIO_TypeDef            Pointer auf den Port des Chipselect-Pin
-  NSS_Pin          uint16_t                Chipselect-Pin Numer
-  statReg          IC_Status_Register      Information aus dem Statusregister 0
-  statReg1         IC_Status_Register1     Information aus dem Statusregister 1
-  statReg2         IC_Status_Register2     Information aus dem Statusregister 2
-  ctrlReg1         IC_Control_Register1    Information aus dem Controlregister 1
-  ctrlReg1         IC_Control_Register2    Information aus dem Controlregister 2
-  ctrlReg1         IC_Control_Register3    Information aus dem Controlregister 3
-  ctrlReg1         IC_Control_Register4    Information aus dem Controlregister 4
-  ctrlReg1         IC_Control_Register5    Information aus dem Controlregister 5
-  ctrlReg1         IC_Control_Register6    Information aus dem Controlregister 6
-  ctrlReg1         IC_Control_Register7    Information aus dem Controlregister 7
-  ctrlReg1         IC_Control_Register8    Information aus dem Controlregister 8
-  ctrlReg1         IC_Control_Register9    Information aus dem Controlregister 9
-  ctrlReg1         IC_Control_Register10   Information aus dem Controlregister 10
+| Name       | Typ                    | Beschreibung                                       |
+|------------|------------------------|----------------------------------------------------|
+| spiHandle  | SPI_HandleTypeDef     | Pointer to the SPI instance to be used             |
+| NSS_Port   | GPIO_TypeDef           | Pointer to the port of the Chipselect pin          |
+| NSS_Pin    | uint16_t               | Chipselect pin number                              |
+| statReg    | IC_Status_Register     | Information from status register 0                  |
+| statReg1   | IC_Status_Register1    | Information from status register 1                  |
+| statReg2   | IC_Status_Register2    | Information from status register 2                  |
+| ctrlReg1   | IC_Control_Register1   | Information from control register 1                 |
+| ctrlReg2   | IC_Control_Register2   | Information from control register 2                 |
+| ctrlReg3   | IC_Control_Register3   | Information from control register 3                 |
+| ctrlReg4   | IC_Control_Register4   | Information from control register 4                 |
+| ctrlReg5   | IC_Control_Register5   | Information from control register 5                 |
+| ctrlReg6   | IC_Control_Register6   | Information from control register 6                 |
+| ctrlReg7   | IC_Control_Register7   | Information from control register 7                 |
+| ctrlReg8   | IC_Control_Register8   | Information from control register 8                 |
+| ctrlReg9   | IC_Control_Register9   | Information from control register 9                 |
+| ctrlReg10  | IC_Control_Register10  | Information from control register 10                |
 
-  : MCT8316 Struct.
-:::
 
 ### MCT8316 Initialisation
 
